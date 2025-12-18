@@ -37,6 +37,7 @@ type UserRecipe = {
 type ConnectionStep = {
   unknownIngredients: UnknownIngredient[];
   recipes: UserRecipe[];
+  logs: string[];
 };
 
 function App() {
@@ -60,8 +61,9 @@ function App() {
     });
   }, [connectionStep?.recipes]);
 
-  // NEW: State to track the currently viewed recipe
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+
+  const [showLogs, setShowLogs] = useState(false);
 
   const ingredientsMap = useMemo(() => {
     const dict: Record<string, IngredientDescription> = {};
@@ -170,6 +172,31 @@ function App() {
                 </span>
               </div>
             ))}
+          </div>
+
+          <div className="pt-4">
+            <button
+              onClick={() => setShowLogs(!showLogs)}
+              className="text-xs font-bold text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-2"
+            >
+              {showLogs ? "▼ Hide System Reasoning" : "▶ Show System Reasoning"}
+            </button>
+
+            {showLogs && (
+              <div className="bg-gray-900 rounded-md p-3 max-h-80 overflow-y-auto font-mono text-[14px] leading-tight text-green-400 border border-gray-700 shadow-inner">
+                {connectionStep.logs && connectionStep.logs.length > 0 ? (
+                  connectionStep.logs.map((log, idx) => (
+                    <div key={idx} className="mb-1">
+                      <span className="text-blue-400 mr-1">[{idx}]</span> {log}
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-gray-500 italic">
+                    No logs available...
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {connectionStep.recipes.every((r) => r.possible === false) && (
